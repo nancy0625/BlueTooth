@@ -20,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,15 +45,19 @@ import android.widget.Toast;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import static java.lang.Character.getNumericValue;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
     private ListView listView;
     private Button button_discover;
     private TextView textView_status;
@@ -79,8 +84,22 @@ public class MainActivity extends AppCompatActivity {
             textView_status.setTextColor(Color.rgb(30, 90, 80));
         }
     };
+
     private String str_receive;
+    /**
+     * 电话的下标的变化量
+     */
     private int countTell = 0;
+    private int flag = 0;
+    /**
+     * 文本转语音
+     */
+    private TextToSpeech textToSpeech = null;
+
+    private boolean isForeground = true;//界面处于前台？
+
+    /////
+
     private Handler handler = new Handler();
     private static final String TAG = "mydebug";
     View view_main;
@@ -93,6 +112,22 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         view_main = layoutInflater.inflate(R.layout.activity_main, null);
         setContentView(view_main);
+        //
+
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //初始化成功的话，设置语音，这里将它设置为中文
+                if (status == TextToSpeech.SUCCESS){
+                    int supported = textToSpeech.setLanguage(Locale.US);
+                    if ((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
+                        Toast.makeText(MainActivity.this,"不支持当前语言",Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        });
+        ///
         listView = (ListView) findViewById(R.id.listView1);
         button_discover = (Button) findViewById(R.id.button1);
         textView_status = (TextView) findViewById(R.id.textView1);
@@ -228,6 +263,20 @@ public class MainActivity extends AppCompatActivity {
                             textView_status.setTextColor(Color.RED);
                         }
                     }
+
+                    /**
+                     * 文本转语音的播放方法
+                     * @param
+                     */
+                    private void broadcast(String phoneNum){
+                        textToSpeech.setLanguage(Locale.CHINA);
+                        textToSpeech.speak("您即将拨打"+phoneNum,TextToSpeech.QUEUE_ADD,null);//可以用QUEUE_FLUSH
+                        flag = 1;
+                    }
+
+
+
+
                     /////////////////拨打电话
                     private void startTell(String phoneNum) {
                         Intent
@@ -252,6 +301,7 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
                         startActivity(intent);
+                        flag = 1;
                     }
                     //////////////////////////////
                     //挂断电话
@@ -285,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
 
                         Toast.makeText(MainActivity.this, "挂断电话！", Toast.LENGTH_SHORT).show();
                     }
+
                     //////////判断电话数组下标
                     private void isIndex(int num,int len){
                         if (num == -1){
@@ -305,14 +356,15 @@ public class MainActivity extends AppCompatActivity {
                         byte[] bytesreceive = characteristic.getValue();
                         Log.e(TAG, "收到数据");
 
-                        /////////////
-                        String tell[] = {"15382664921","13760795885","18566769375","13068560902","13725477419"};
-                        int len = tell.length;
+                        /////////////创建电话簿数组
+                        final String tell[] = {"15992430146","15382664921"};/*"18566769375","13068560902","13725477419"*/
+                        int len = tell.length;//数组长度
 
                        //////////////////
 
                         if (bytesreceive.length != 0) {
-                            if (checkBox_receivehex.isChecked() == true) {
+
+                            if (checkBox_receivehex.isChecked() == true && isForeground ) {
                                 str_receive = new String();
                                 for (int i = 0; i < bytesreceive.length; i++) {
                                     String str_hex = (Integer.toHexString((int) bytesreceive[i] & 0x000000ff) + "").toUpperCase();
@@ -320,33 +372,54 @@ public class MainActivity extends AppCompatActivity {
                                     str_receive += str_hex + " ";
                                 }
                                 Log.e("EEE", str_receive.charAt(1)+"");
+
+                                //定时器
+                                Timer timer = new Timer();
+                                TimerTask timerTask = new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        startTell(tell[countTell]);
+
+                                    }
+                                };
+
+
                                 ////////////判断是否拨打电话
                                 switch (str_receive.charAt(1)){
                                     case '1':
-                                        startTell(tell[countTell]);
+
                                         break;
                                     case '2':
-                                        endTell();
+
                                         break;
                                     case '3':
                                         //左摇头
-                                        isIndex(countTell,len);
-                                        countTell --;
+                                        if (flag !=1){
+                                            broadcast(tell[countTell]);
+                                            timer.schedule(timerTask,6000);
+                                        }
+
                                         break;
                                     case '4':
                                         //右摇头
-                                        isIndex(countTell,len);
-                                        countTell ++;
+                                        if (flag !=1){
+                                            broadcast(tell[countTell]);
+                                            timer.schedule(timerTask,6000);
+                                        }
                                         break;
                                     case '5':
                                         //左点头
-                                        isIndex(countTell,len);
-                                        countTell--;
+                                        if (flag !=1){
+                                            broadcast(tell[countTell]);
+                                            timer.schedule(timerTask,6000);
+                                        }
                                         break;
                                     case '6':
                                         //右点头
-                                        isIndex(countTell,len);
-                                        countTell++;
+                                        if (flag !=1){
+                                            broadcast(tell[countTell]);
+                                            timer.schedule(timerTask,6000);
+                                        }
                                         break;
                                     default:
                                         break;
@@ -417,42 +490,49 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log.e(TAG, "onStart");
+        isForeground = true;
+        Log.e("TTT", "onStart");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume");
+        isForeground = true;
+        Log.e("TTT", "onResume");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.e(TAG, "onRestart");
+        isForeground = true;
+        Log.e("TTT", "onRestart");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e(TAG, "onPause");
+        isForeground = false;
+        Log.e("TTT", "onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.e(TAG, "onStop");
+        isForeground = false;
+        Log.e("TTT", "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         Log.e(TAG, "onDestroy");
         bluetoothLeScanner.stopScan(scanCallback);
         if (bluetoothGatt != null) {
             bluetoothGatt.disconnect();
             bluetoothGatt.close();
         }
+        isForeground = false;
     }
 
     @Override
@@ -516,4 +596,16 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     };
+
+    /**
+     * Called to signal the completion of the TextToSpeech engine initialization.
+     *
+     * @param status {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+     */
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            textToSpeech.setLanguage(Locale.CHINA);
+        }
+    }
 }
