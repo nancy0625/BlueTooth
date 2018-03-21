@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -54,9 +55,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import static android.speech.tts.TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID;
 import static java.lang.Character.getNumericValue;
 
-public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
     private ListView listView;
     private Button button_discover;
     private TextView textView_status;
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private int flag = 0;
     private int flag1 = 0;
     private int flag2 = 0;
-    private char preNum = '0' ;
+    private char preNum = '0';
     /**
      * 文本转语音
      */
@@ -109,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     View view_main;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,23 +123,26 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             @Override
             public void onInit(int status) {
                 //初始化成功的话，设置语音，这里将它设置为中文
-                if (status == TextToSpeech.SUCCESS){
+                if (status == TextToSpeech.SUCCESS) {
                     int supported = textToSpeech.setLanguage(Locale.US);
-                    if ((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
-                        Toast.makeText(MainActivity.this,"不支持当前语言",Toast.LENGTH_SHORT).show();
+                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
                     }
                 }
 
             }
+
+
         });
+
         textToSpeech1 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 //初始化成功的话，设置语音，这里将它设置为中文
-                if (status == TextToSpeech.SUCCESS){
+                if (status == TextToSpeech.SUCCESS) {
                     int supported = textToSpeech1.setLanguage(Locale.US);
-                    if ((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
-                        Toast.makeText(MainActivity.this,"不支持当前语言",Toast.LENGTH_SHORT).show();
+                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -149,10 +153,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             @Override
             public void onInit(int status) {
                 //初始化成功的话，设置语音，这里将它设置为中文
-                if (status == TextToSpeech.SUCCESS){
+                if (status == TextToSpeech.SUCCESS) {
                     int supported = textToSpeech2.setLanguage(Locale.US);
-                    if ((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
-                        Toast.makeText(MainActivity.this,"不支持当前语言",Toast.LENGTH_SHORT).show();
+                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -301,25 +305,25 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                      * 文本转语音的播放方法
                      * @param
                      */
-                    private void broadcast(String phoneNum){
+                    private void broadcast(String phoneNum) {
                         textToSpeech.setLanguage(Locale.CHINA);
-                        textToSpeech.speak("您即将拨打"+phoneNum,TextToSpeech.QUEUE_ADD,null);//可以用QUEUE_FLUSH
+                        textToSpeech.speak("您即将拨打" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
                         flag = 1;
                     }
-                    private void broadcast1(String phoneNum){
+
+                    private void broadcast1(String phoneNum) {
                         textToSpeech1.setLanguage(Locale.CHINA);
-                        textToSpeech1.speak("上"+phoneNum,TextToSpeech.QUEUE_FLUSH,null);//可以用QUEUE_FLUSH
+                        textToSpeech1.speak("上一個" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
                         flag1 = 3;
 
                     }
-                    private void broadcast2(String phoneNum){
+
+                    private void broadcast2(String phoneNum) {
                         textToSpeech2.setLanguage(Locale.CHINA);
-                        textToSpeech2.speak("下"+phoneNum,TextToSpeech.QUEUE_FLUSH,null);//可以用QUEUE_FLUSH
+                        textToSpeech2.speak("下一個" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
                         flag2 = 4;
 
                     }
-
-
 
 
                     /////////////////拨打电话
@@ -347,9 +351,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
                         startActivity(intent);
                     }
+
                     //////////////////////////////
                     //挂断电话
-                    private void endTell(){
+                    private void endTell() {
 
                         // 延迟5秒后自动挂断电话
                         // 首先拿到TelephonyManager
@@ -403,19 +408,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Log.e(TAG, "收到数据");
                         /////////////创建电话簿数组
                        /* final String tell[] = {};*/
-                       final String tell[] = {"15382664921","13712879174","13119537851","13428206324","18566769375","13068560902","13725477419","15992430146"};
+                        final String tell[] = {"15382664921", "13712879174", "13119537851", "13428206324", "18566769375", "13068560902", "13725477419", "15992430146"};
                         int len = tell.length;//数组长度
-                       //////////////////
+                        //////////////////
                         if (bytesreceive.length != 0) {
 
-                            if (checkBox_receivehex.isChecked() == true ) {
+                            if (checkBox_receivehex.isChecked() == true) {
                                 str_receive = new String();
                                 for (int i = 0; i < bytesreceive.length; i++) {
                                     String str_hex = (Integer.toHexString((int) bytesreceive[i] & 0x000000ff) + "").toUpperCase();
                                     if (str_hex.length() == 1) str_hex = "0" + str_hex;
                                     str_receive += str_hex + " ";
                                 }
-                                Log.e("EEE", str_receive.charAt(1)+"");
+                                Log.e("EEE", str_receive.charAt(1) + "");
 
                                 //定时器
                                 Timer timer = new Timer();
@@ -427,67 +432,70 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                     }
                                 };
                                 ////////////判断是否拨打电话
-                                switch (str_receive.charAt(1)){
+                                switch (str_receive.charAt(1)) {
                                     case '1':
 
                                         break;
                                     case '2':
-                                        Log.e("FF", str_receive.charAt(1)+"");
+                                        Log.e("FF", str_receive.charAt(1) + "");
 
-                                        if (preNum !=  str_receive.charAt(0)){
-                                            if (flag !=1 ){
+                                        if (preNum != str_receive.charAt(0)) {
+                                            flag = 0;
+                                            if (flag != 1) {
                                                 broadcast(tell[countTell]);
-                                                timer.schedule(timerTask,5000);
+                                                timer.schedule(timerTask, 5000);
                                             }
 
-                                        }else {
-                                            flag = 0;
-                                            preNum = str_receive.charAt(0);
                                         }
+
+                                            preNum = str_receive.charAt(0);
+
 
                                         break;
                                     case '3':
                                         //左摇头
-                                        if (preNum != str_receive.charAt(0)){
-                                            if (flag1 != 3){
-                                                if (countTell==len){
+                                        if (preNum != str_receive.charAt(0)) {
+                                            flag1 = 0;
+                                            if (flag1 != 3) {
+                                                if (countTell == len) {
                                                     countTell = 0;
-                                                }else if (countTell == -1){
-                                                    countTell = len-1;
+                                                } else if (countTell == -1) {
+                                                    countTell = len - 1;
                                                 }
-                                                countTell --;
+                                                countTell--;
                                                 broadcast1(tell[countTell]);
                                             }
 
-                                        }else {
+                                        }
 
                                             preNum = str_receive.charAt(0);
-                                        }
+
 
                                         break;
                                     case '4':
                                         //右摇头
-                                        if (preNum != str_receive.charAt(0)){
-                                            if (flag2 != 4){
-                                                if (countTell==len){
+                                        if (preNum != str_receive.charAt(0)) {
+                                            flag2 = 0;
+                                            if (flag2 != 4) {
+                                                if (countTell == len) {
                                                     countTell = 0;
-                                                }else if (countTell == -1){
-                                                 countTell = len-1;
+                                                } else if (countTell == -1) {
+                                                    countTell = len - 1;
                                                 }
-                                                countTell ++;
+                                                countTell++;
                                                 broadcast2(tell[countTell]);
                                             }
 
-                                        }else {
+                                        }
 
                                             preNum = str_receive.charAt(0);
-                                        }
+
 
                                         break;
                                     case '5':
 
                                         //左点头
-                                       // endTell();
+                                        // endTell();
                                        /* if (flag !=1){
                                             broadcast(tell[countTell]);
                                             timer.schedule(timerTask,5000);
@@ -495,7 +503,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                         break;
                                     case '6':
 
-                                       // endTell();
+                                        // endTell();
                                         //右点头
                                         /*if (flag !=1){
                                             broadcast(tell[countTell]);
@@ -541,8 +549,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 getSystemService(Context.BLUETOOTH_SERVICE);
 
         bluetoothAdapter = bluetoothManager.getAdapter();
-        if (!bluetoothAdapter.isEnabled())
-        {
+        if (!bluetoothAdapter.isEnabled()) {
             startActivityForResult(new Intent(bluetoothAdapter.ACTION_REQUEST_ENABLE), 0);  // 弹对话框的形式提示用户开启蓝牙
         }
 
@@ -616,6 +623,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         isForeground = false;
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -678,6 +686,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
     };
 
+
     /**
      * Called to signal the completion of the TextToSpeech engine initialization.
      *
@@ -685,10 +694,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
      */
     @Override
     public void onInit(int status) {
-       /* if (status == TextToSpeech.SUCCESS) {
+        if (status == TextToSpeech.SUCCESS) {
             textToSpeech.setLanguage(Locale.CHINA);
             textToSpeech1.setLanguage(Locale.CHINA);
             textToSpeech2.setLanguage(Locale.CHINA);
-        }*/
+        }
     }
+
+
 }
