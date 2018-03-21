@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Log.e(TAG, "收到数据");
                         /////////////创建电话簿数组
                        /* final String tell[] = {};*/
-                        final String tell[] = {"15382664921", "13712879174", "13119537851", "13428206324", "18566769375", "13068560902", "13725477419", "15992430146"};
+                        final String tell[] = {"15382664921", "13428206324", "18566769375", "13068560902", "13725477419"};
                         int len = tell.length;//数组长度
                         //////////////////
                         if (bytesreceive.length != 0) {
@@ -457,10 +457,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                         if (preNum != str_receive.charAt(0)) {
                                             flag1 = 0;
                                             if (flag1 != 3) {
-                                                if (countTell == len) {
-                                                    countTell = 0;
-                                                } else if (countTell == -1) {
-                                                    countTell = len - 1;
+                                               if (countTell == -1) {
+                                                    countTell = len ;
                                                 }
                                                 countTell--;
                                                 broadcast1(tell[countTell]);
@@ -477,10 +475,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                         if (preNum != str_receive.charAt(0)) {
                                             flag2 = 0;
                                             if (flag2 != 4) {
-                                                if (countTell == len) {
-                                                    countTell = 0;
-                                                } else if (countTell == -1) {
-                                                    countTell = len - 1;
+                                                if (countTell == len-1) {
+                                                    countTell = -1;
                                                 }
                                                 countTell++;
                                                 broadcast2(tell[countTell]);
