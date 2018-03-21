@@ -45,7 +45,6 @@ import android.widget.Toast;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,10 +90,15 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
      */
     private int countTell = 0;
     private int flag = 0;
+    private int flag1 = 0;
+    private int flag2 = 0;
+    private char preNum = '0' ;
     /**
      * 文本转语音
      */
     private TextToSpeech textToSpeech = null;
+    private TextToSpeech textToSpeech1 = null;
+    private TextToSpeech textToSpeech2 = null;
 
     private boolean isForeground = true;//界面处于前台？
 
@@ -127,6 +131,35 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
             }
         });
+        textToSpeech1 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //初始化成功的话，设置语音，这里将它设置为中文
+                if (status == TextToSpeech.SUCCESS){
+                    int supported = textToSpeech1.setLanguage(Locale.US);
+                    if ((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
+                        Toast.makeText(MainActivity.this,"不支持当前语言",Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        });
+
+        textToSpeech2 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //初始化成功的话，设置语音，这里将它设置为中文
+                if (status == TextToSpeech.SUCCESS){
+                    int supported = textToSpeech2.setLanguage(Locale.US);
+                    if ((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
+                        Toast.makeText(MainActivity.this,"不支持当前语言",Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        });
+
+
         ///
         listView = (ListView) findViewById(R.id.listView1);
         button_discover = (Button) findViewById(R.id.button1);
@@ -136,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         listView.setAdapter(simpleAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(final AdapterView<?> parent, View view, int position, long id) {
                 Log.e(TAG, "你点击了第" + position + "项");
                 bluetoothDevice = devices.get(position);
                 handler.removeCallbacks(runnable);
@@ -273,6 +306,18 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         textToSpeech.speak("您即将拨打"+phoneNum,TextToSpeech.QUEUE_ADD,null);//可以用QUEUE_FLUSH
                         flag = 1;
                     }
+                    private void broadcast1(String phoneNum){
+                        textToSpeech1.setLanguage(Locale.CHINA);
+                        textToSpeech1.speak("上"+phoneNum,TextToSpeech.QUEUE_FLUSH,null);//可以用QUEUE_FLUSH
+                        flag1 = 3;
+
+                    }
+                    private void broadcast2(String phoneNum){
+                        textToSpeech2.setLanguage(Locale.CHINA);
+                        textToSpeech2.speak("下"+phoneNum,TextToSpeech.QUEUE_FLUSH,null);//可以用QUEUE_FLUSH
+                        flag2 = 4;
+
+                    }
 
 
 
@@ -301,7 +346,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             return;
                         }
                         startActivity(intent);
-                        flag = 1;
                     }
                     //////////////////////////////
                     //挂断电话
@@ -337,17 +381,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
 
                     //////////判断电话数组下标
-                    private void isIndex(int num,int len){
-                        if (num == -1){
-                            num = len;
+                  /*  private boolean isIndex(int tell, int len){
+                        if (tell == -1){
+
+                            return true;
                         }
-                        if (num == len){
-                            num = 0;
+                        if (tell == len+1){
+
+                            countTell = 0;
+                            return true;
                         }
-                    }
+                        return false;
+                    }*/
                     /////////////
-
-
                     @Override
                     public void onCharacteristicChanged(BluetoothGatt
                                                                 gatt, BluetoothGattCharacteristic characteristic) {
@@ -355,16 +401,14 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         super.onCharacteristicChanged(gatt, characteristic);
                         byte[] bytesreceive = characteristic.getValue();
                         Log.e(TAG, "收到数据");
-
                         /////////////创建电话簿数组
-                        final String tell[] = {"15992430146","15382664921"};/*"18566769375","13068560902","13725477419"*/
+                       /* final String tell[] = {};*/
+                       final String tell[] = {"15382664921","13712879174","13119537851","13428206324","18566769375","13068560902","13725477419","15992430146"};
                         int len = tell.length;//数组长度
-
                        //////////////////
-
                         if (bytesreceive.length != 0) {
 
-                            if (checkBox_receivehex.isChecked() == true && isForeground ) {
+                            if (checkBox_receivehex.isChecked() == true ) {
                                 str_receive = new String();
                                 for (int i = 0; i < bytesreceive.length; i++) {
                                     String str_hex = (Integer.toHexString((int) bytesreceive[i] & 0x000000ff) + "").toUpperCase();
@@ -382,49 +426,85 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                                     }
                                 };
-
-
                                 ////////////判断是否拨打电话
                                 switch (str_receive.charAt(1)){
                                     case '1':
 
                                         break;
                                     case '2':
+                                        Log.e("FF", str_receive.charAt(1)+"");
+
+                                        if (preNum !=  str_receive.charAt(0)){
+                                            if (flag !=1 ){
+                                                broadcast(tell[countTell]);
+                                                timer.schedule(timerTask,5000);
+                                            }
+
+                                        }else {
+                                            flag = 0;
+                                            preNum = str_receive.charAt(0);
+                                        }
 
                                         break;
                                     case '3':
                                         //左摇头
-                                        if (flag !=1){
-                                            broadcast(tell[countTell]);
-                                            timer.schedule(timerTask,6000);
+                                        if (preNum != str_receive.charAt(0)){
+                                            if (flag1 != 3){
+                                                if (countTell==len){
+                                                    countTell = 0;
+                                                }else if (countTell == -1){
+                                                    countTell = len-1;
+                                                }
+                                                countTell --;
+                                                broadcast1(tell[countTell]);
+                                            }
+
+                                        }else {
+
+                                            preNum = str_receive.charAt(0);
                                         }
 
                                         break;
                                     case '4':
                                         //右摇头
-                                        if (flag !=1){
-                                            broadcast(tell[countTell]);
-                                            timer.schedule(timerTask,6000);
+                                        if (preNum != str_receive.charAt(0)){
+                                            if (flag2 != 4){
+                                                if (countTell==len){
+                                                    countTell = 0;
+                                                }else if (countTell == -1){
+                                                 countTell = len-1;
+                                                }
+                                                countTell ++;
+                                                broadcast2(tell[countTell]);
+                                            }
+
+                                        }else {
+
+                                            preNum = str_receive.charAt(0);
                                         }
+
                                         break;
                                     case '5':
+
                                         //左点头
-                                        if (flag !=1){
+                                       // endTell();
+                                       /* if (flag !=1){
                                             broadcast(tell[countTell]);
-                                            timer.schedule(timerTask,6000);
-                                        }
+                                            timer.schedule(timerTask,5000);
+                                        }*/
                                         break;
                                     case '6':
+
+                                       // endTell();
                                         //右点头
-                                        if (flag !=1){
+                                        /*if (flag !=1){
                                             broadcast(tell[countTell]);
-                                            timer.schedule(timerTask,6000);
-                                        }
+                                            timer.schedule(timerTask,5000);
+                                        }*/
                                         break;
                                     default:
                                         break;
                                 }
-                                /////////////////////////
 
                             } else {
                                 str_receive = new String(bytesreceive);
@@ -435,6 +515,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                                 @Override
                                 public void run() {
+
 
                                     textView_receive.append(Html.fromHtml("<html><body><br><font size=\"3\" color=\"#2600AF\">你收到了：</font></br></body></html>"));//追加字符串
                                     textView_receive.append(str_receive);//追加字符串
@@ -604,8 +685,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
      */
     @Override
     public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
+       /* if (status == TextToSpeech.SUCCESS) {
             textToSpeech.setLanguage(Locale.CHINA);
-        }
+            textToSpeech1.setLanguage(Locale.CHINA);
+            textToSpeech2.setLanguage(Locale.CHINA);
+        }*/
     }
 }
