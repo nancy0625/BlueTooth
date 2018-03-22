@@ -422,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                 }
                                 Log.e("EEE", str_receive.charAt(1) + "");
 
-                                //定时器
+                                //定时器 拨打电话
                                 Timer timer = new Timer();
                                 TimerTask timerTask = new TimerTask() {
                                     @Override
