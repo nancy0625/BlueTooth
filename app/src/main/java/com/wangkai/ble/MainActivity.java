@@ -434,6 +434,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                 ////////////判断是否拨打电话
                                 switch (str_receive.charAt(1)) {
                                     case '1':
+                                        endTell();
 
                                         break;
                                     case '2':
