@@ -1,4 +1,4 @@
-package com.wangkai.ble;
+package com.gdmec.ble;
 
 import org.junit.Test;
 

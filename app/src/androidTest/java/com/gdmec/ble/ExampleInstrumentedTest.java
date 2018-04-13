@@ -1,4 +1,4 @@
-package com.wangkai.ble;
+package com.gdmec.ble;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

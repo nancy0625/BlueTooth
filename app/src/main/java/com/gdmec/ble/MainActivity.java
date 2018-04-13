@@ -1,4 +1,4 @@
-package com.wangkai.ble;
+package com.gdmec.ble;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -20,8 +20,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -43,6 +44,8 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.wangkai.blecommunication.ITelephony;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,7 +58,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import static android.speech.tts.TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID;
 import static java.lang.Character.getNumericValue;
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
@@ -117,60 +119,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         view_main = layoutInflater.inflate(R.layout.activity_main, null);
         setContentView(view_main);
-        //
-
-        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                //初始化成功的话，设置语音，这里将它设置为中文
-                if (status == TextToSpeech.SUCCESS) {
-                    int supported = textToSpeech.setLanguage(Locale.US);
-                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
-                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-            }
+        init();
 
 
-        });
-
-        textToSpeech1 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                //初始化成功的话，设置语音，这里将它设置为中文
-                if (status == TextToSpeech.SUCCESS) {
-                    int supported = textToSpeech1.setLanguage(Locale.US);
-                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
-                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-            }
-        });
-
-        textToSpeech2 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                //初始化成功的话，设置语音，这里将它设置为中文
-                if (status == TextToSpeech.SUCCESS) {
-                    int supported = textToSpeech2.setLanguage(Locale.US);
-                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
-                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-            }
-        });
 
 
         ///
-        listView = (ListView) findViewById(R.id.listView1);
-        button_discover = (Button) findViewById(R.id.button1);
-        textView_status = (TextView) findViewById(R.id.textView1);
-        listItem = new ArrayList<>();
-        simpleAdapter = new SimpleAdapter(this, listItem, R.layout.item_main, new String[]{"name", "mac"}, new int[]{R.id.item_1, R.id.item_2});
-        listView.setAdapter(simpleAdapter);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, View view, int position, long id) {
@@ -238,7 +193,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                         button_send.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                if (editText_send.getText().length() > 0) {
+                                                Intent intent = new Intent(MainActivity.this,Main1Activity.class);
+                                                startActivity(intent);
+                                                /*if (editText_send.getText().length() > 0) {
                                                     byte[] senddatas = new byte[0];
                                                     String str = new String();
                                                     if (checkBox_sendhex.isChecked() == false) {
@@ -282,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                                     }
                                                 } else {
                                                     textView_receive.append(Html.fromHtml("<html><body><br><font size=\"4\" color=\"#B50300\">请输入数据</font></br></body></html>"));//追加字符串
-                                                }
+                                                }*/
                                             }
                                         });
                                     }
@@ -301,92 +258,31 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         }
                     }
 
-                    /**
-                     * 文本转语音的播放方法
-                     * @param
-                     */
-                    private void broadcast(String phoneNum) {
-                        textToSpeech.setLanguage(Locale.CHINA);
-                        textToSpeech.speak("您即将拨打" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
-                        flag = 1;
-                    }
-
-                    private void broadcast1(String phoneNum) {
-                        textToSpeech1.setLanguage(Locale.CHINA);
-                        textToSpeech1.speak("上一個" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
-                        flag1 = 3;
-
-                    }
-
-                    private void broadcast2(String phoneNum) {
-                        textToSpeech2.setLanguage(Locale.CHINA);
-                        textToSpeech2.speak("下一個" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
-                        flag2 = 4;
-
-                    }
-
-
-                    /////////////////拨打电话
-                    private void startTell(String phoneNum) {
-                        Intent
-                                intent = new
-
-                                Intent(Intent.ACTION_CALL);
-
-                        Uri data = Uri.parse("tel:"
-
-                                + phoneNum);
-
-                        intent.setData(data);
-
-                        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
-                            return;
-                        }
-                        startActivity(intent);
-                    }
-
-                    //////////////////////////////
-                    //挂断电话
-                    private void endTell() {
-
-                        // 延迟5秒后自动挂断电话
-                        // 首先拿到TelephonyManager
-                        TelephonyManager telMag = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                        Class<TelephonyManager> c = TelephonyManager.class;
-
-                        // 再去反射TelephonyManager里面的私有方法 getITelephony 得到 ITelephony对象
-                        Method mthEndCall = null;
-                        try {
-                            mthEndCall = c.getDeclaredMethod("getITelephony", (Class[]) null);
-                            //允许访问私有方法
-                            mthEndCall.setAccessible(true);
-                            final Object obj = mthEndCall.invoke(telMag, (Object[]) null);
-
-                            // 再通过ITelephony对象去反射里面的endCall方法，挂断电话
-                            Method mt = obj.getClass().getMethod("endCall");
-                            //允许访问私有方法
-                            mt.setAccessible(true);
-                            mt.invoke(obj);
-                        } catch (NoSuchMethodException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-
-                        Toast.makeText(MainActivity.this, "挂断电话！", Toast.LENGTH_SHORT).show();
-                    }
 
                     //////////判断电话数组下标
-                  /*  private boolean isIndex(int tell, int len){
+                 /*   ITelephony iTelephony;
+
+
+
+      try {
+
+                        Method getITelephonyMethod = TelephonyManager.class.getDeclaredMethod("getITelephony", (Class[]) null);
+
+                        getITelephonyMethod.setAccessible(true);
+
+                        iTelephony = (ITelephony) getITelephonyMethod.invoke(tm, (Object[]) null);
+
+                        iTelephony.endCall();
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        System.out.println(e.getMessage());
+
+                    }*/
+
+                    /*  private boolean isIndex(int tell, int len){
                         if (tell == -1){
 
                             return true;
@@ -572,6 +468,177 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         Log.e(TAG, "onCreat");
     }
 
+
+    private void init() {
+        listView = (ListView) findViewById(R.id.listView1);
+        button_discover = (Button) findViewById(R.id.button1);
+        textView_status = (TextView) findViewById(R.id.textView1);
+        listItem = new ArrayList<>();
+        simpleAdapter = new SimpleAdapter(this, listItem, R.layout.item_main, new String[]{"name", "mac"}, new int[]{R.id.item_1, R.id.item_2});
+        listView.setAdapter(simpleAdapter);
+
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //初始化成功的话，设置语音，这里将它设置为中文
+                if (status == TextToSpeech.SUCCESS) {
+                    int supported = textToSpeech.setLanguage(Locale.US);
+                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+
+
+        });
+
+        textToSpeech1 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //初始化成功的话，设置语音，这里将它设置为中文
+                if (status == TextToSpeech.SUCCESS) {
+                    int supported = textToSpeech1.setLanguage(Locale.US);
+                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        });
+
+        textToSpeech2 = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //初始化成功的话，设置语音，这里将它设置为中文
+                if (status == TextToSpeech.SUCCESS) {
+                    int supported = textToSpeech2.setLanguage(Locale.US);
+                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        });
+
+    }
+
+    /**
+     * 文本转语音的播放方法
+     * @param
+     */
+    private void broadcast(String phoneNum) {
+        textToSpeech.setLanguage(Locale.CHINA);
+        textToSpeech.speak("您即将拨打" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
+        flag = 1;
+    }
+
+    private void broadcast1(String phoneNum) {
+        textToSpeech1.setLanguage(Locale.CHINA);
+        textToSpeech1.speak("上一個" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
+        flag1 = 3;
+
+    }
+
+    private void broadcast2(String phoneNum) {
+        textToSpeech2.setLanguage(Locale.CHINA);
+        textToSpeech2.speak("下一個" + phoneNum, TextToSpeech.QUEUE_ADD, null);//可以用QUEUE_FLUSH
+        flag2 = 4;
+
+    }
+
+
+    /////////////////拨打电话
+    private void startTell(String phoneNum) {
+        Intent
+                intent = new
+
+                Intent(Intent.ACTION_CALL);
+
+        Uri data = Uri.parse("tel:"
+
+                + phoneNum);
+
+        intent.setData(data);
+
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        startActivity(intent);
+    }
+
+    //////////////////////////////
+
+    //挂断电话
+    private void endTell() {
+
+        // 延迟5秒后自动挂断电话
+        // 首先拿到TelephonyManager
+        TelephonyManager telMag = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        Class<TelephonyManager> c = TelephonyManager.class;
+
+        // 再去反射TelephonyManager里面的私有方法 getITelephony 得到 ITelephony对象
+        Method mthEndCall = null;
+        try {
+            mthEndCall = c.getDeclaredMethod("getITelephony", (Class[]) null);
+            //允许访问私有方法
+            mthEndCall.setAccessible(true);
+            final Object obj = mthEndCall.invoke(telMag, (Object[]) null);
+
+            // 再通过ITelephony对象去反射里面的endCall方法，挂断电话
+            Method mt = obj.getClass().getMethod("endCall");
+            //允许访问私有方法
+            mt.setAccessible(true);
+            mt.invoke(obj);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        Toast.makeText(MainActivity.this, "挂断电话！", Toast.LENGTH_SHORT).show();
+    }
+    private void AnswerTell() {
+
+        // 延迟5秒后自动挂断电话
+        // 首先拿到TelephonyManager
+        TelephonyManager telMag = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        Class<TelephonyManager> c = TelephonyManager.class;
+
+        // 再去反射TelephonyManager里面的私有方法 getITelephony 得到 ITelephony对象
+        Method mthEndCall = null;
+        try {
+            mthEndCall = c.getDeclaredMethod("getITelephony", (Class[]) null);
+            //允许访问私有方法
+            mthEndCall.setAccessible(true);
+            final Object obj = mthEndCall.invoke(telMag, (Object[]) null);
+
+            // 再通过ITelephony对象去反射里面的endCall方法，挂断电话
+            Method mt = obj.getClass().getMethod("answerRingingCall");
+            //允许访问私有方法
+            mt.setAccessible(true);
+            mt.invoke(obj);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        Toast.makeText(MainActivity.this, "电话！", Toast.LENGTH_SHORT).show();
+    }
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -642,7 +709,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             case R.id.Item_about://点击“关于”
 
                 new AlertDialog.Builder(MainActivity.this).setTitle("关于")//设置对话框标题
-                        .setMessage("版本：V1.0\n作者：锝威凯文\n 邮箱：deweikaiwen@163.com")//设置显示的内容
+                        .setMessage("版本：V1.0")//设置显示的内容
                         .setPositiveButton("返回", new DialogInterface.OnClickListener() {//添加确定按钮
                             @Override
                             public void onClick(DialogInterface dialog, int which) {//确定按钮的响应事件
