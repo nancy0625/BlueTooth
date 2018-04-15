@@ -455,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 handler.removeCallbacks(runnable);
                 bluetoothLeScanner.stopScan(scanCallback);
                 bluetoothLeScanner.startScan(scanCallback);
-                textView_status.setText("正在搜索...");
+                textView_status.setText("正在搜索.、、..");
                 textView_status.setTextColor(Color.BLUE);
                 handler.postDelayed(runnable, 10000);
             }
