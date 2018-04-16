@@ -304,7 +304,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Log.e(TAG, "收到数据");
                         /////////////创建电话簿数组
                        /* final String tell[] = {};*/
-                        final String tell[] = {"15382664921", "13428206324", "18566769375", "13068560902", "13725477419"};
+                        UserBean bean = null;
+                        bean = DBUtils.getInstance(MainActivity.this).getUserInfo();
+                        final String tell[] = {bean.phoneNum1, bean.phoneNum2, bean.phoneNum3,bean.phoneNum1,bean.phoneNum2,bean.phoneNum3};
                         int len = tell.length;//数组长度
                         //////////////////
                         if (bytesreceive.length != 0) {
@@ -455,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 handler.removeCallbacks(runnable);
                 bluetoothLeScanner.stopScan(scanCallback);
                 bluetoothLeScanner.startScan(scanCallback);
-                textView_status.setText("正在搜索.、、..");
+                textView_status.setText("正在搜索...");
                 textView_status.setTextColor(Color.BLUE);
                 handler.postDelayed(runnable, 10000);
             }
@@ -605,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             e.printStackTrace();
         }
 
-        Toast.makeText(MainActivity.this, "挂断电话！", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this, "挂断电话！", Toast.LENGTH_SHORT).show();
     }
     private void AnswerTell() {
 

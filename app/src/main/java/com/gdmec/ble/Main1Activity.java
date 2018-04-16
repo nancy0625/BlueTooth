@@ -34,7 +34,7 @@ public class Main1Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main1);
         initView();
         initData();
 
@@ -69,11 +69,11 @@ public class Main1Activity extends AppCompatActivity implements View.OnClickList
             bean = new UserBean();
             //bean.userName = "qq";
             bean.address1 = " 广东机电北校区G3";
-            bean.phoneNum1 = "152635968745";
+            bean.phoneNum1 = "18566769375";
             bean.address2 = " 广东机电北校区G2";
-            bean.phoneNum2 = "177835968745";
+            bean.phoneNum2 = "15382664921";
             bean.address3 = " 广东机电北校区G1";
-            bean.phoneNum3 = "132637458745";
+            bean.phoneNum3 = "13068560902";
 
             //保存用戶信息到數據庫
             DBUtils.getInstance(this).saveUserInfo(bean);
