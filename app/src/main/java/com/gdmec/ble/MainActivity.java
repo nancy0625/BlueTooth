@@ -306,12 +306,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                        /* final String tell[] = {};*/
                         UserBean bean = null;
                         bean = DBUtils.getInstance(MainActivity.this).getUserInfo();
-                        final String tell[] = {bean.phoneNum1, bean.phoneNum2, bean.phoneNum3,bean.phoneNum1,bean.phoneNum2,bean.phoneNum3};
+                        final String tell[] = {bean.phoneNum1, bean.phoneNum2, bean.phoneNum3};
+                        final String adr[] = {bean.address1,bean.address2,bean.address3};
                         int len = tell.length;//数组长度
                         //////////////////
                         if (bytesreceive.length != 0) {
 
-                            if (checkBox_receivehex.isChecked() == true) {
+                            if (/**checkBox_receivehex.isChecked() == */true) {
                                 str_receive = new String();
                                 for (int i = 0; i < bytesreceive.length; i++) {
                                     String str_hex = (Integer.toHexString((int) bytesreceive[i] & 0x000000ff) + "").toUpperCase();
@@ -341,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                         if (preNum != str_receive.charAt(0)) {
                                             flag = 0;
                                             if (flag != 1) {
-                                                broadcast(tell[countTell]);
+                                                broadcast(adr[countTell]);
                                                 timer.schedule(timerTask, 5000);
                                             }
 
@@ -352,44 +353,33 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                                         break;
                                     case '3':
-                                        //左摇头
-                                        if (preNum != str_receive.charAt(0)) {
-                                            flag1 = 0;
-                                            if (flag1 != 3) {
-                                               if (countTell == -1) {
-                                                    countTell = len ;
-                                                }
-                                                countTell--;
-                                                broadcast1(tell[countTell]);
-                                            }
 
-                                        }
-
-                                            preNum = str_receive.charAt(0);
 
 
                                         break;
                                     case '4':
                                         //右摇头
-                                        if (preNum != str_receive.charAt(0)) {
-                                            flag2 = 0;
-                                            if (flag2 != 4) {
-                                                if (countTell == len-1) {
-                                                    countTell = -1;
-                                                }
-                                                countTell++;
-                                                broadcast2(tell[countTell]);
-                                            }
 
-                                        }
-
-                                            preNum = str_receive.charAt(0);
 
 
                                         break;
                                     case '5':
 
                                         //左点头
+                                        //左摇头
+                                        if (preNum != str_receive.charAt(0)) {
+                                            flag1 = 0;
+                                            if (flag1 != 3) {
+                                                if (countTell == -1) {
+                                                    countTell = len ;
+                                                }
+                                                countTell--;
+                                                broadcast1(adr[countTell]);
+                                            }
+
+                                        }
+
+                                        preNum = str_receive.charAt(0);
                                         // endTell();
                                        /* if (flag !=1){
                                             broadcast(tell[countTell]);
@@ -400,6 +390,19 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
                                         // endTell();
                                         //右点头
+                                        if (preNum != str_receive.charAt(0)) {
+                                            flag2 = 0;
+                                            if (flag2 != 4) {
+                                                if (countTell == len-1) {
+                                                    countTell = -1;
+                                                }
+                                                countTell++;
+                                                broadcast2(adr[countTell]);
+                                            }
+
+                                        }
+
+                                        preNum = str_receive.charAt(0);
                                         /*if (flag !=1){
                                             broadcast(tell[countTell]);
                                             timer.schedule(timerTask,5000);
