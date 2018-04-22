@@ -68,11 +68,11 @@ public class Main1Activity extends AppCompatActivity implements View.OnClickList
         if (bean == null) {
             bean = new UserBean();
             //bean.userName = "qq";
-            bean.address1 = " 广东机电北校区G3";
+            bean.address1 = " 北校区G3";
             bean.phoneNum1 = "18566769375";
-            bean.address2 = " 广东机电北校区G2";
+            bean.address2 = " 北校区G2";
             bean.phoneNum2 = "15382664921";
-            bean.address3 = " 广东机电北校区G1";
+            bean.address3 = " 北校区G1";
             bean.phoneNum3 = "13068560902";
 
             //保存用戶信息到數據庫
