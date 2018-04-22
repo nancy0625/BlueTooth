@@ -159,7 +159,7 @@ public class Main1Activity extends AppCompatActivity implements View.OnClickList
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
-            case CHANGE_ADDRESS1://近程地址
+            case CHANGE_ADDRESS1://近程地址。
                  if(data != null){
                 new_info = data.getStringExtra("address1");
                 if (TextUtils.isEmpty(new_info)){
