@@ -252,42 +252,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     }
 
 
-                    //////////判断电话数组下标
-                 /*   ITelephony iTelephony;
 
-
-
-      try {
-
-                        Method getITelephonyMethod = TelephonyManager.class.getDeclaredMethod("getITelephony", (Class[]) null);
-
-                        getITelephonyMethod.setAccessible(true);
-
-                        iTelephony = (ITelephony) getITelephonyMethod.invoke(tm, (Object[]) null);
-
-                        iTelephony.endCall();
-
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
-
-                        System.out.println(e.getMessage());
-
-                    }*/
-
-                    /*  private boolean isIndex(int tell, int len){
-                        if (tell == -1){
-
-                            return true;
-                        }
-                        if (tell == len+1){
-
-                            countTell = 0;
-                            return true;
-                        }
-                        return false;
-                    }*/
-                    /////////////
                     @Override
                     public void onCharacteristicChanged(BluetoothGatt
                                                                 gatt, BluetoothGattCharacteristic characteristic) {
