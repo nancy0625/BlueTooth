@@ -570,36 +570,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         //Toast.makeText(MainActivity.this, "挂断电话！", Toast.LENGTH_SHORT).show();
     }
-    private void AnswerTell() {
-
-        // 延迟5秒后自动挂断电话
-        // 首先拿到TelephonyManager
-        TelephonyManager telMag = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        Class<TelephonyManager> c = TelephonyManager.class;
-
-        // 再去反射TelephonyManager里面的私有方法 getITelephony 得到 ITelephony对象
-        Method mthEndCall = null;
-        try {
-            mthEndCall = c.getDeclaredMethod("getITelephony", (Class[]) null);
-            //允许访问私有方法
-            mthEndCall.setAccessible(true);
-            final Object obj = mthEndCall.invoke(telMag, (Object[]) null);
-
-            // 再通过ITelephony对象去反射里面的endCall方法，挂断电话
-            Method mt = obj.getClass().getMethod("answerRingingCall");
-            //允许访问私有方法
-            mt.setAccessible(true);
-            mt.invoke(obj);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        Toast.makeText(MainActivity.this, "电话！", Toast.LENGTH_SHORT).show();
-    }
 
 
     @Override
