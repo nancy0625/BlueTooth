@@ -42,6 +42,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -186,9 +187,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                         button_send.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                Intent intent = new Intent(MainActivity.this,Main1Activity.class);
-                                                startActivity(intent);
-                                                /*if (editText_send.getText().length() > 0) {
+
+                                                if (editText_send.getText().length() > 0) {
                                                     byte[] senddatas = new byte[0];
                                                     String str = new String();
                                                     if (checkBox_sendhex.isChecked() == false) {
@@ -232,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                                                     }
                                                 } else {
                                                     textView_receive.append(Html.fromHtml("<html><body><br><font size=\"4\" color=\"#B50300\">请输入数据</font></br></body></html>"));//追加字符串
-                                                }*/
+                                                }
                                             }
                                         });
                                     }
